@@ -8,9 +8,13 @@
 namespace net {
 
 template <typename T>
-concept serializable = requires(const T& p1, T& p2) {
-  { p1.serialize(std::declval<struct serializer&>()) };
-  { p2.deserialize(std::declval<struct deserializer&>()) } -> std::same_as<bool>;
+concept serializable = requires(const T& p) {
+  { p.serialize(std::declval<struct serializer&>()) };
+};
+
+template <typename T>
+concept deserializable = requires(T& p) {
+  { p.deserialize(std::declval<struct deserializer&>()) } -> std::same_as<bool>;
 };
 
 struct serializer {
@@ -130,11 +134,11 @@ struct deserializer {
   /**
    * @brief Deserialize data.
    * @param value The value to deserialize.
-   * @tparam T The type of the value. Must satisfy trivially_copyable and must not satisfy serializable.
+   * @tparam T The type of the value. Must satisfy trivially_copyable and must not satisfy deserializable.
    * @return true if the data was deserialized, false otherwise.
    */
   template <typename T>
-    requires(std::is_trivially_copyable_v<T> && !serializable<T>)
+    requires(std::is_trivially_copyable_v<T> && !deserializable<T>)
   bool deserialize(T& value) {
     return deserialize(&value, sizeof(value));
   }
@@ -142,10 +146,10 @@ struct deserializer {
   /**
    * @brief Deserialize data.
    * @param value The value to deserialize.
-   * @tparam T The type of the value. Must satisfy serializable.
+   * @tparam T The type of the value. Must satisfy deserializable.
    * @return true if the data was deserialized, false otherwise.
    */
-  template <serializable T>
+  template <deserializable T>
   bool deserialize(T& value) {
     return value.deserialize(*this);
   }
