@@ -10,3 +10,9 @@ target_compile_features(
   PRIVATE
   cxx_std_23
 )
+
+target_link_libraries(
+  ${PROJECT_NAME}
+  PRIVATE
+  ws2_32
+)
