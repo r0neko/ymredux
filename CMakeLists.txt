@@ -1,16 +1,16 @@
-cmake_minimum_required(VERSION 3.25.0)
+cmake_minimum_required(VERSION 3.27)
+project(YMRedux)
 
-project(ymredux)
+set(CMAKE_CXX_STANDARD 23)
 
-set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+add_executable(YMRedux
+        src/main.cpp
 
-add_compile_options(
-  -Wall
-  -Wextra
-  -Wpedantic
-  -Wno-microsoft
-  -fno-exceptions
-  -fno-rtti
+        src/core/tcp_connection.cpp
+        src/core/tcp_server.cpp
+
+        src/ymsg/ymsg_connection.cpp
+        src/ymsg/ymsg_frame_field.cpp
 )
 
-add_subdirectory(server)
+target_include_directories(YMRedux PUBLIC src)
