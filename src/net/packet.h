@@ -28,15 +28,16 @@
 #include <vector>
 
 namespace net {
-    template<typename T>
-    concept serializable = requires(const T &p) {
-        { p.serialize(std::declval<struct serializer &>()) };
-    };
-
-    template<typename T>
-    concept deserializable = requires(T &p) {
-        { p.deserialize(std::declval<struct deserializer &>()) } -> std::same_as<bool>;
-    };
+//    // MSVC doesn't like our concepts, so we'll just get rid of them... for now.
+//    template<typename T>
+//    concept serializable = requires(const T &p) {
+//        { p.serialize(std::declval<struct serializer &>()) };
+//    };
+//
+//    template<typename T>
+//    concept deserializable = requires(T &p) {
+//        { p.deserialize(std::declval<struct deserializer &>()) } -> std::same_as<bool>;
+//    };
 
     struct serializer {
         using value_type = std::byte;
@@ -91,7 +92,8 @@ namespace net {
          * @tparam T The type of the value. Must satisfy trivially_copyable and must not satisfy serializable.
          */
         template<typename T>
-        requires(std::is_trivially_copyable_v<T> && !serializable<T>)
+//        requires(std::is_trivially_copyable_v<T> && !serializable<T>)
+        requires(std::is_trivially_copyable_v<T>)
         void serialize(const T &value) {
             serialize(&value, sizeof(value));
         }
@@ -101,7 +103,8 @@ namespace net {
          * @param value The value to serialize.
          * @tparam T The type of the value. Must satisfy serializable.
          */
-        template<serializable T>
+//        template<serializable T>
+        template<typename T>
         void serialize(const T &value) {
             value.serialize(*this);
         }
@@ -112,7 +115,8 @@ namespace net {
          * @tparam As The types of the arguments to forward to the constructor of T.
          * @param args The arguments to forward to the constructor of T.
          */
-        template<serializable T, typename... As>
+//        template<serializable T, typename... As>
+        template<typename T, typename... As>
         void emplace(As &&... args) {
             T(std::forward<As>(args)...).serialize(*this);
         }
@@ -194,7 +198,8 @@ namespace net {
          * @return true if the data was deserialized, false otherwise.
          */
         template<typename T>
-        requires(std::is_trivially_copyable_v<T> && !deserializable<T>)
+//        requires(std::is_trivially_copyable_v<T> && !deserializable<T>)
+        requires(std::is_trivially_copyable_v<T>)
         bool deserialize(T &value) {
             return deserialize(&value, sizeof(value));
         }
@@ -205,7 +210,8 @@ namespace net {
          * @tparam T The type of the value. Must satisfy deserializable.
          * @return true if the data was deserialized, false otherwise.
          */
-        template<deserializable T>
+//        template<deserializable T>
+        template<typename T>
         bool deserialize(T &value) {
             return value.deserialize(*this);
         }

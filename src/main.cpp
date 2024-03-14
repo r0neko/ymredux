@@ -28,7 +28,7 @@
 #include <net/socket.h>
 #include <net/packet.h>
 #include <net/protocol/ymsg/ymsg_header.h>
-#include "net/protocol/ymsg/ymsg_field.h"
+#include <net/protocol/ymsg/ymsg_field.h>
 
 void init_loggers() {
     spdlog::stdout_color_mt("system");
@@ -36,14 +36,17 @@ void init_loggers() {
 }
 
 int32_t main() {
-    net::socket ymsg_sock(net::socket::type::stream);
     init_loggers();
+    net::impl::impl_init();
 
     spdlog::get("system")->info("Welcome to the YMRedux Server!");
-
-    ymsg_sock.bind(net::endpoint("127.0.0.1", 5050));
-
     spdlog::get("system")->info("Initializing YMSG Server...");
+
+    net::socket ymsg_sock(net::socket::type::stream);
+    if(!ymsg_sock.bind(net::endpoint("127.0.0.1", 5050))) {
+        spdlog::get("system")->error("Failed to bind!");
+        return EXIT_FAILURE;
+    }
 
     if (!ymsg_sock.listen()) {
         spdlog::get("system")->error("Failed to listen for connections!");
@@ -64,7 +67,8 @@ int32_t main() {
         spdlog::get("net")->info("New connection received!");
 
         net::serializer p_data;
-        p_data.emplace<net::protocol::ymsg_field>(net::protocol::YMSG_FLD_CURRENT_ID, "cox");
+        net::protocol::ymsg_field field(net::protocol::YMSG_FLD_CURRENT_ID, "cox");
+        p_data.emplace<net::protocol::ymsg_field>(field);
 
         net::serializer s;
         s.emplace<net::protocol::ymsg_header>(16,
@@ -78,5 +82,6 @@ int32_t main() {
         socket.write(s);
     }
 
+    net::impl::impl_cleanup();
     return EXIT_SUCCESS;
 }

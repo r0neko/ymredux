@@ -35,7 +35,19 @@
 #include <utility>
 
 namespace net {
-    using socket_type = SOCKET;
+    namespace impl {
+        inline void impl_init() {
+#ifdef WIN32
+            wsa_init();
+#endif
+        }
+
+        inline void impl_cleanup() {
+#ifdef WIN32
+            wsa_cleanup();
+#endif
+        }
+    }
 
     template<typename T>
     concept socket_buffer = std::ranges::range<T> && std::is_trivially_copyable_v<typename T::value_type> &&
