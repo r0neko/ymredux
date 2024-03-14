@@ -48,6 +48,9 @@ namespace net {
                 s.serialize(YMSG_FIELD_SEPARATOR);
                 s.serialize(value.data(), value.size());
                 s.serialize(YMSG_FIELD_SEPARATOR);
+
+                spdlog::get("net")->debug("Serialize:");
+                print_info();
             }
 
             /**
@@ -82,6 +85,9 @@ namespace net {
 
                 d.deserialize(value.data(), value_size);
                 d.deserialize_ignore(2); // ignore separator
+
+                spdlog::get("net")->debug("Deserialize:");
+                print_info();
 
                 return true;
             }

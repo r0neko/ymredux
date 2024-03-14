@@ -33,6 +33,9 @@
 void init_loggers() {
     spdlog::stdout_color_mt("system");
     spdlog::stdout_color_mt("net");
+
+    spdlog::get("system")->set_level(spdlog::level::trace);
+    spdlog::get("net")->set_level(spdlog::level::trace);
 }
 
 int32_t main() {
@@ -66,20 +69,36 @@ int32_t main() {
 
         spdlog::get("net")->info("New connection received!");
 
-        net::serializer p_data;
-        net::protocol::ymsg_field field(net::protocol::YMSG_FLD_CURRENT_ID, "cox");
-        p_data.emplace<net::protocol::ymsg_field>(field);
+        std::vector<std::byte> buffer;
 
-        net::serializer s;
-        s.emplace<net::protocol::ymsg_header>(16,
-                                              0,
-                                              p_data.size(),
-                                              net::protocol::YES_USER_LOGIN,
-                                              net::protocol::YES_STATUS_NOTIFY,
-                                              0);
-        s.serialize(p_data.data().data(), p_data.size());
+        while(socket.is_valid()) {
+            if(!socket.read(buffer)) {
+                spdlog::get("net")->critical("Read error!");
+                socket.close();
 
-        socket.write(s);
+                continue;
+            }
+
+            for(size_t i = 0; i < buffer.size(); i++) {
+                printf("%08x ", (std::uint8_t) buffer.at(i));
+            }
+            printf("\n");
+
+//            net::serializer p_data;
+//            net::protocol::ymsg_field field(net::protocol::YMSG_FLD_CURRENT_ID, "cox");
+//            p_data.emplace<net::protocol::ymsg_field>(field);
+//
+//            net::serializer s;
+//            s.emplace<net::protocol::ymsg_header>(16,
+//                                                  0,
+//                                                  p_data.size(),
+//                                                  net::protocol::YES_USER_LOGIN,
+//                                                  net::protocol::YES_STATUS_NOTIFY,
+//                                                  0);
+//            s.serialize(p_data.data().data(), p_data.size());
+//
+//            socket.write(s);
+        }
     }
 
     net::impl::impl_cleanup();

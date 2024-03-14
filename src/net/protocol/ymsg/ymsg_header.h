@@ -57,6 +57,9 @@ namespace net {
                 s.serialize(cvt_endian((std::uint16_t) type));
                 s.serialize(cvt_endian((std::uint32_t) status));
                 s.serialize(cvt_endian(session_id));
+
+                spdlog::get("net")->debug("Serialize:");
+                print_info();
             }
 
             /**
@@ -92,6 +95,8 @@ namespace net {
 
                 DESERIALIZE_CVT(d, session_id);
 
+                spdlog::get("net")->debug("Deserialize:");
+                print_info();
 
                 return true;
             }
