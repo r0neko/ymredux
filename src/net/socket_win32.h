@@ -27,12 +27,12 @@
 
 namespace net {
     namespace impl {
-        [[gnu::constructor]] inline void wsa_init() {
+        inline void wsa_init() {
             WSADATA wsa_data;
             WSAStartup(MAKEWORD(2, 2), &wsa_data);
         }
 
-        [[gnu::destructor]] inline void wsa_cleanup() {
+        inline void wsa_cleanup() {
             WSACleanup();
         }
     }  // namespace impl
