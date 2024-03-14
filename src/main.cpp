@@ -75,14 +75,15 @@ int32_t main() {
             if(!socket.read(buffer)) {
                 spdlog::get("net")->critical("Read error!");
                 socket.close();
-
                 continue;
             }
 
-            for(size_t i = 0; i < buffer.size(); i++) {
-                printf("%08x ", (std::uint8_t) buffer.at(i));
+            if(buffer.size() > 0) {
+                for (size_t i = 0; i < buffer.size(); i++) {
+                    printf("%08x ", (std::uint8_t) buffer.at(i));
+                }
+                printf("\n");
             }
-            printf("\n");
 
 //            net::serializer p_data;
 //            net::protocol::ymsg_field field(net::protocol::YMSG_FLD_CURRENT_ID, "cox");

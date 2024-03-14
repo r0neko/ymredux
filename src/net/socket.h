@@ -207,6 +207,11 @@ namespace net {
             do {
                 const auto bytes_read = read_raw(buffer.data(), buffer.size());
                 if (bytes_read <= 0) {
+#ifdef WIN32
+                    if (WSAGetLastError() == WSAEWOULDBLOCK) {
+                        break;
+                    }
+#endif
                     return false;
                 }
 
@@ -258,6 +263,13 @@ namespace net {
             const auto client_socket = ::accept(socket_, reinterpret_cast<sockaddr *>(&address), &length);
             if (client_socket == invalid_socket) {
                 return std::nullopt;
+            }
+
+            // configure non blocking
+//          fcntl(client_socket, F_SETFL, O_NONBLOCK);
+            u_long mode = 1;  // 1 for non-blocking, 0 for blocking
+            if (ioctlsocket(client_socket, FIONBIO, &mode) == SOCKET_ERROR) {
+                // Handle error
             }
 
             return std::make_pair(socket(client_socket), endpoint(address));
