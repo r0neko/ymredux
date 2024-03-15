@@ -136,6 +136,7 @@ namespace net {
         size_t size() const {
             return buffer_.size();
         }
+
     private:
         std::vector<std::byte> buffer_;
     };
@@ -182,8 +183,9 @@ namespace net {
             if (data_.size() < sizeof(value))
                 return static_cast<size_t>(-1);
 
-            for(size_t i = 0; i < data_.size() - sizeof(value); i++) {
-                if(std::memcmp(data_.data() + i, &value, sizeof(value)) == 0) {
+            for (size_t i = 0; i <= (data_.size() - sizeof(value)); i++) {
+                auto d_value = *(T *) (data_.data() + i);
+                if (d_value == value) {
                     return i;
                 }
             }
@@ -214,6 +216,14 @@ namespace net {
         template<typename T>
         bool deserialize(T &value) {
             return value.deserialize(*this);
+        }
+
+        /**
+        * @brief Get the length of the remaining, serialized data.
+        * @return The length of the remaining, serialized data.
+        */
+        size_t size() const {
+            return data_.size();
         }
 
     private:

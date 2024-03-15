@@ -30,7 +30,7 @@
 
 namespace net {
     namespace protocol {
-        constexpr auto YMSG_FIELD_SEPARATOR = static_cast<std::uint16_t>(0xC080);
+        constexpr auto YMSG_FIELD_SEPARATOR = static_cast<std::uint16_t>(0x80C0);
 
         struct [[gnu::packed]] ymsg_frame_field {
             /**
@@ -42,6 +42,8 @@ namespace net {
                     YMSG_FLD_ key, std::string_view value)
                     : key(key),
                       value(value) {}
+
+            constexpr ymsg_frame_field() = default;
 
             YMSG_FLD_ key;
             std::string value;
