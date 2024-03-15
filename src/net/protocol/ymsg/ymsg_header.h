@@ -29,8 +29,6 @@
 
 #include <net/protocol/ymsg/structure/ymsg_frame_header.h>
 
-#include <spdlog/spdlog.h>
-
 namespace net {
     namespace protocol {
         // deserialize with endian conversion macro
@@ -57,9 +55,6 @@ namespace net {
                 s.serialize(cvt_endian((std::uint16_t) type));
                 s.serialize(cvt_endian((std::uint32_t) status));
                 s.serialize(cvt_endian(session_id));
-
-                spdlog::get("net")->debug("Serialize:");
-                print_info();
             }
 
             /**
@@ -81,13 +76,13 @@ namespace net {
                 DESERIALIZE_CVT(d, vendor_id);
                 DESERIALIZE_CVT(d, length);
 
-                if (!d.deserialize((std::uint16_t&) type)) {
+                if (!d.deserialize((std::uint16_t &) type)) {
                     return false;
                 }
 
                 type = (YES_) cvt_endian((std::uint16_t) type);
 
-                if (!d.deserialize((std::int32_t&) status)) {
+                if (!d.deserialize((std::int32_t &) status)) {
                     return false;
                 }
 
@@ -95,22 +90,7 @@ namespace net {
 
                 DESERIALIZE_CVT(d, session_id);
 
-                spdlog::get("net")->debug("Deserialize:");
-                print_info();
-
                 return true;
-            }
-
-            void print_info() const {
-                spdlog::get("net")->debug("YMSGHeader (");
-                spdlog::get("net")->debug("    magic = 0x{0:X}", magic);
-                spdlog::get("net")->debug("    protocol_version = {0}", protocol_version);
-                spdlog::get("net")->debug("    vendor_id = {0:X}", vendor_id);
-                spdlog::get("net")->debug("    length = {0}", length);
-                spdlog::get("net")->debug("    type = {0:X}", (uint16_t) type);
-                spdlog::get("net")->debug("    status = {0:X}", (uint32_t) status);
-                spdlog::get("net")->debug("    session_id = {0:X}", session_id);
-                spdlog::get("net")->debug(")\n");
             }
         };
 

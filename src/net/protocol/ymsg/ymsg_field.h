@@ -37,6 +37,14 @@ namespace net {
             using protocol::ymsg_frame_field::ymsg_frame_field;
 
             /**
+             * @brief Construct and deserialize the field.
+             * @param d The deserializer.
+             */
+            explicit ymsg_field(deserializer &d) {
+                deserialize(d);
+            }
+
+            /**
              * @brief Serialize the message header.
              * @note To satisfy serializable.
              * @param s The serializer.
@@ -49,7 +57,7 @@ namespace net {
                 s.serialize(value.data(), value.size());
                 s.serialize(YMSG_FIELD_SEPARATOR);
 
-                spdlog::get("net")->debug("Serialize:");
+                printf("Serialize:\n");
                 print_info();
             }
 
@@ -69,10 +77,12 @@ namespace net {
 
                 // read key as string
                 std::string key_str{};
-                key_str.reserve(key_size);
+                key_str.resize(key_size);
 
                 d.deserialize(key_str.data(), key_size);
                 d.deserialize_ignore(2); // ignore separator
+
+                key = (YMSG_FLD_) std::stoi(key_str);
 
                 auto value_size = d.find_pattern_first(YMSG_FIELD_SEPARATOR);
 
@@ -81,22 +91,22 @@ namespace net {
                     return false;
                 }
 
-                value.reserve(value_size);
+                value.resize(value_size);
 
                 d.deserialize(value.data(), value_size);
                 d.deserialize_ignore(2); // ignore separator
 
-                spdlog::get("net")->debug("Deserialize:");
+                printf("Deserialize:\n");
                 print_info();
 
                 return true;
             }
 
             void print_info() const {
-                spdlog::get("net")->debug("YMSGField (");
-                spdlog::get("net")->debug("    key = {0}", (int) key);
-                spdlog::get("net")->debug("    value = {0}", value);
-                spdlog::get("net")->debug(")");
+                printf("YMSGField (\n");
+                printf("    key = %i\n", (int) key);
+                printf("    value = %s\n", value.data());
+                printf(")\n");
             }
         };
     }  // namespace protocol

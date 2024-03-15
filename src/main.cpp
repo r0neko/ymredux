@@ -25,17 +25,16 @@
 #include <spdlog/spdlog.h>
 #include <spdlog/sinks/stdout_color_sinks.h>
 
-#include <net/socket.h>
-#include <net/packet.h>
-#include <net/protocol/ymsg/ymsg_header.h>
-#include <net/protocol/ymsg/ymsg_field.h>
+#include <server/server.h>
 
 void init_loggers() {
-    spdlog::stdout_color_mt("system");
-    spdlog::stdout_color_mt("net");
+    spdlog::stdout_color_st("system");
+    spdlog::stdout_color_st("net");
+    spdlog::stdout_color_st("server");
 
     spdlog::get("system")->set_level(spdlog::level::trace);
     spdlog::get("net")->set_level(spdlog::level::trace);
+    spdlog::get("server")->set_level(spdlog::level::trace);
 }
 
 int32_t main() {
@@ -46,7 +45,7 @@ int32_t main() {
     spdlog::get("system")->info("Initializing YMSG Server...");
 
     net::socket ymsg_sock(net::socket::type::stream);
-    if(!ymsg_sock.bind(net::endpoint("127.0.0.1", 5050))) {
+    if (!ymsg_sock.bind(net::endpoint("127.0.0.1", 5050))) {
         spdlog::get("system")->error("Failed to bind!");
         return EXIT_FAILURE;
     }
@@ -71,20 +70,42 @@ int32_t main() {
 
         std::vector<std::byte> buffer;
 
-        while(socket.is_valid()) {
-            if(!socket.read(buffer)) {
+        while (socket.is_valid()) {
+            if (!socket.read(buffer)) {
                 spdlog::get("net")->critical("Read error!");
                 socket.close();
                 continue;
             }
 
-            if(buffer.size() > 0) {
-                for (size_t i = 0; i < buffer.size(); i++) {
-                    printf("%08x ", (std::uint8_t) buffer.at(i));
+            net::deserializer frame(buffer);
+
+            while (frame.size() >= sizeof(net::protocol::ymsg_frame_header)) {
+                net::protocol::ymsg_header header;
+                header.deserialize(frame);
+
+                if (header.magic != net::protocol::YMSG_HEADER_MAGIC) {
+                    spdlog::get("net")->critical("Invalid packet magic!");
+
+                    socket.close();
+                    break;
                 }
-                printf("\n");
+
+                if (frame.size() >= header.length) {
+                    // read all fields in frame
+                    std::vector<net::protocol::ymsg_field> fields;
+
+                    while (frame.size() > 0) {
+                        fields.emplace_back(frame);
+                    }
+
+                    server::handle_frame(socket, header, fields);
+                }
             }
 
+            // we have read everything in our buffer
+            if (frame.size() == 0 && buffer.size()) {
+                buffer.clear();
+            }
 //            net::serializer p_data;
 //            net::protocol::ymsg_field field(net::protocol::YMSG_FLD_CURRENT_ID, "cox");
 //            p_data.emplace<net::protocol::ymsg_field>(field);
@@ -100,6 +121,8 @@ int32_t main() {
 //
 //            socket.write(s);
         }
+
+        spdlog::get("net")->error("Connection lost!");
     }
 
     net::impl::impl_cleanup();

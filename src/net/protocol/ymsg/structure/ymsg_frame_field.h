@@ -43,6 +43,8 @@ namespace net {
                     : key(key),
                       value(value) {}
 
+            constexpr ymsg_frame_field() = default;
+
             YMSG_FLD_ key;
             std::string value;
         };

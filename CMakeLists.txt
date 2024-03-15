@@ -10,6 +10,10 @@ find_package(spdlog CONFIG REQUIRED)
 add_executable(
         ${PROJECT_NAME}
         src/main.cpp
+        src/server/server.cpp
+        src/server/handlers/helo.cpp
+        src/server/handlers/login_stage2.cpp
+        src/server/handlers/port_check.cpp
 )
 
 target_link_libraries(

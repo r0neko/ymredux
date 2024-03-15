@@ -52,6 +52,8 @@ namespace net {
                       status(status),
                       session_id(session_id) {}
 
+            constexpr ymsg_frame_header() = default;
+
             std::uint32_t magic;
             std::uint16_t protocol_version;
             std::uint16_t vendor_id;
