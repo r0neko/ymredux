@@ -15,7 +15,7 @@ Please check the wiki page situated [here](here.png) for more information regard
 ## Mentions
 
 Deep gratitude goes to:
-- [cimbruwu](https://github.com/cimbruwu) for being my lover and place of comfort <3
 - [pushfq](https://github.com/pushfq) for the code refactoring, C++ advice and networking code;
 - [r0neko](https://github.com/r0neko) for performing the RE of the protocol and implementing it;
 - [itsjustyryr](https://github.com/itsjustyryr) for being the main tester for the emulator;
+
